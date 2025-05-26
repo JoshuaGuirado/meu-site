@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Apresentação - Joshua Guirado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Família Guirado</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,76 +13,107 @@
         }
 
         header {
-            background-color: #101484;
+            background-color: #005288;
             color: white;
-            padding: 20px 0;
             text-align: center;
+            padding: 20px 0;
         }
 
-        main {
-            max-width: 800px;
+        .container {
+            width: 90%;
+            max-width: 1000px;
             margin: 30px auto;
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        h2 {
+        .person {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .person img {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-right: 20px;
+            background-color: #ddd;
+        }
+
+        .person-info {
+            max-width: 700px;
+        }
+
+        .person-info h2 {
+            margin-bottom: 10px;
             color: #333;
         }
 
-        p {
-            font-size: 18px;
-            line-height: 1.6;
-        }
-
-        .foto {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .foto img {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        .person-info p {
+            margin: 5px 0;
         }
 
         footer {
-            background-color: #0d1aa1;
-            color: white;
             text-align: center;
-            padding: 15px 0;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
+            padding: 15px;
+            color: #888;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Minha Família - Guirado</h1>
+    </header>
 
-<header>
-    <h1>Bem-vindo ao meu site!</h1>
-</header>
+    <div class="container">
+        <!-- Pai -->
+        <div class="person">
+            <img src="C:\Users\joshu\OneDrive\Área de Trabalho\Site Família\Ricardo.png" alt="Foto do Pai">
+            <div class="person-info">
+                <h2>Ricardo Augusto Guirado</h2>
+                <p><strong>Nascimento:</strong> 22 de abril de 1975</p>
+                <p><strong>Profissão:</strong> Consultor</p>
+            </div>
+        </div>
 
-<main>
-    <h2>Sobre mim</h2>
-    <p>Olá! Meu nome é Joshua Filipe Rodrigues Guirado.</p>
-    <p>Atualmente trabalho como consultor júnior, estou cursando o primeiro ano de Engenharia de Software na Unicesumar, estou aprendendo a programar e já estou estudando sobre IA.</p>
-    <p>Nasci dia 14 de janeiro de 2007 em Maringá no Paraná.</p>
+        <!-- Mãe -->
+        <div class="person">
+            <img src="C:\Users\joshu\OneDrive\Área de Trabalho\Site Família\Captura de tela 2025-05-26 164923.png" alt="Foto da Mãe">
+            <div class="person-info">
+                <h2>Maressa Rodrigues Guirado</h2>
+                <p><strong>Nascimento:</strong> 31 de agosto de 1978</p>
+                <p><strong>Profissão:</strong> Atende Pessoas</p>
+            </div>
+        </div>
 
-    <div class="foto">
-        <img src="sua-foto.jpg" alt="Foto de Joshua Guirado">
-        <p> Esse sou eu!</p>
+        <!-- Irmã -->
+        <div class="person">
+            <img src="C:\Users\joshu\OneDrive\Área de Trabalho\Site Família\Alyssa.jpg" alt="Foto da Irmã">
+            <div class="person-info">
+                <h2>Alyssa Guirado</h2>
+                <p><strong>Nascimento:</strong> 3 de março de 2004</p>
+                <p><strong>Profissão:</strong> Influencer Digital</p>
+            </div>
+        </div>
 
+        <!-- Você -->
+        <div class="person">
+            <img src="C:\Users\joshu\OneDrive\Área de Trabalho\Site Família\Foto Sueter Azul.png" alt="Sua Foto">
+            <div class="person-info">
+                <h2>Joshua Filipe Rodrigues Guirado</h2>
+                <p><strong>Nascimento:</strong> 14 de janeiro de 2007</p>
+                <p><strong>Profissão:</strong> Consultor Júnior</p>
+            </div>
+        </div>
     </div>
-</main>
 
-<footer>
-    &copy; 2025-Joshua Guirado
-</footer>
-
+    <footer>
+        <p>Site feito com carinho por Joshua Guirado 🧠💻</p>
+    </footer>
 </body>
 </html>
