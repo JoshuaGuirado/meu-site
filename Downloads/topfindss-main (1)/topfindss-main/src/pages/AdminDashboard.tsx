@@ -297,8 +297,8 @@ export default function AdminDashboard({ auth, onLogout, categories, onRefreshCa
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao extrair");
 
-      if (!data.name || !data.price || !data.category_id || !data.subcategory_id) {
-        throw new Error("Dados incompletos");
+      if (!data.name || Number(data.price) <= 0 || !data.category_id) {
+        throw new Error("Dados incompletos (Verifique se o site bloqueou o acesso)");
       }
 
       setBatchQueue(prev => {
@@ -314,10 +314,10 @@ export default function AdminDashboard({ auth, onLogout, categories, onRefreshCa
             image: data.image || "",
             keywords: data.keywords || "",
             category_id: data.category_id,
-            subcategory_id: data.subcategory_id,
+            subcategory_id: data.subcategory_id || "",
             featured: 0,
-            tag_label: "",
-            tag_color: "",
+            tag_label: data.marketplace || "",
+            tag_color: "", // Could set default here
             link_afiliado: JSON.stringify([{ store: data.marketplace || "Principal", url: item.affiliateUrl }])
           }
         };
@@ -1795,13 +1795,22 @@ export default function AdminDashboard({ auth, onLogout, categories, onRefreshCa
                     )}
                   </div>
 
-                  <button
-                    onClick={publishBatchItems}
-                    disabled={batchQueue.filter(i => i.status === 'success').length === 0}
-                    className="w-full mt-auto bg-emerald-500 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
-                  >
-                    <Save className="w-5 h-5" /> Publicar Todos Concluídos
-                  </button>
+                  <div className="flex gap-3 mt-auto">
+                    <button
+                      onClick={() => setBatchQueue(prev => prev.filter(i => i.status !== 'success'))}
+                      disabled={batchQueue.filter(i => i.status === 'success').length === 0}
+                      className="flex-1 bg-neutral-200 text-neutral-600 font-bold py-4 rounded-xl hover:bg-neutral-300 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      Limpar Lista
+                    </button>
+                    <button
+                      onClick={publishBatchItems}
+                      disabled={batchQueue.filter(i => i.status === 'success').length === 0}
+                      className="flex-[2] bg-emerald-500 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                    >
+                      <Save className="w-5 h-5" /> Publicar Todos
+                    </button>
+                  </div>
                 </div>
               </div>
               )}

@@ -306,9 +306,16 @@ async function startServer() {
     try {
       const response = await axios.get(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Sec-Fetch-User': '?1'
         }
       });
       const html = response.data;
@@ -364,10 +371,10 @@ async function startServer() {
           const origPriceStr = $('.basisPrice .a-offscreen').first().text() || $('.a-text-price .a-offscreen').first().text();
           price_original = extractPriceFast(origPriceStr);
         } else if (url.includes('mercadolivre') || url.includes('mlb')) {
-          const priceStr = $('.ui-pdp-price__second-line .andes-money-amount__fraction').first().text() || $('meta[itemprop="price"]').attr('content') || '';
-          price = parseFloat(priceStr.replace(/\./g, ''));
+          const priceStr = $('.ui-pdp-price__second-line .andes-money-amount__fraction').first().text() || $('meta[itemprop="price"]').attr('content') || $('.andes-money-amount__fraction').first().text();
+          price = parseFloat(priceStr.replace(/\./g, '').replace(',', '.'));
           const origPriceStr = $('.ui-pdp-price__original-value .andes-money-amount__fraction').first().text() || '';
-          price_original = parseFloat(origPriceStr.replace(/\./g, ''));
+          price_original = parseFloat(origPriceStr.replace(/\./g, '').replace(',', '.'));
         } else if (url.includes('shopee')) {
           const priceStr = $('.items-center .text-orange-500').text() || $('div[class*="price"]').first().text();
           price = extractPriceFast(priceStr);
@@ -481,9 +488,12 @@ Exemplo de retorno esperado:
         }
       }
 
-      // Final check: if title is just the marketplace name, it's probably a failed scrape
-      if (title.trim() === marketplace && price === 0) {
-        throw new Error("Scrape resulted in marketplace name only and 0 price - likely blocked.");
+      // Final check: if price is 0, or title is just the marketplace name, or title is too generic
+      const lowerTitle = title.toLowerCase().trim();
+      const isBlocked = lowerTitle.includes("acesso negado") || lowerTitle.includes("robot") || lowerTitle.includes("captcha") || lowerTitle.includes("security") || lowerTitle === "mercado livre" || lowerTitle === "amazon" || lowerTitle === "shopee" || lowerTitle === "aliexpress";
+
+      if (price === 0 || isBlocked) {
+        throw new Error("Falha Crítica: O site bloqueou a leitura ou não retornou dados válidos (Preço 0 ou Página de Proteção).");
       }
 
       res.json({
