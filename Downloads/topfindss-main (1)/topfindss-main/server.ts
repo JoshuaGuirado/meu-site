@@ -394,6 +394,8 @@ async function startServer() {
           
           const prompt = `Analise os dados extraídos de uma página de produto e retorne as informações estruturadas em JSON.
 
+IMPORTANTE: Se a página parecer ser um BOT PROTECTION, CAPTCHA, ACESSO NEGADO ou não contiver dados de um produto real, retorne: {"error": "blocked"}
+
 Título da Página: ${title}
 Descrição Meta: ${description.substring(0, 300)}
 URL: ${url}
@@ -405,7 +407,7 @@ ${categories ? JSON.stringify(categories.map((c: any) => ({ id: c.id, name: c.na
 Regras de Retorno:
 1. Retorne ESTREITAMENTE um código JSON válido, sem blocos de código markdown.
 2. "name": Nome amigável e limpo do produto (máximo 100 caracteres).
-3. "price": Valor numérico do preço atual (ex: 1599.90). Se não encontrar, use o valor detectado ${price}.
+3. "price": Valor numérico do preço atual. Se não encontrar, use o valor detectado ${price}.
 4. "price_original": Valor numérico do preço "DE" (original). Se não encontrar, use ${price_original || price}.
 5. "marketplace": Nome da loja (ex: Amazon, Shopee, Mercado Livre, AliExpress, Magalu, etc).
 6. "keywords": 6 a 8 palavras-chave (sinônimos), separados por vírgula.
@@ -419,7 +421,11 @@ Exemplo de retorno esperado:
           const result = await model.generateContent(prompt);
           const aiResult = JSON.parse(result.response.text().replace(/```json/gi, '').replace(/```/g, '').trim());
           
-          if (aiResult.name) title = aiResult.name;
+          if (aiResult.error === 'blocked') {
+            throw new Error("Bot protection detected by AI");
+          }
+
+          if (aiResult.name && aiResult.name !== marketplace) title = aiResult.name;
           if (aiResult.description) description = aiResult.description;
           if (aiResult.price) price = aiResult.price;
           if (aiResult.price_original) price_original = aiResult.price_original;
@@ -432,12 +438,52 @@ Exemplo de retorno esperado:
         }
       }
 
+      // Marketplace detection fallback
       if (!marketplace) {
         if (url.includes('amazon')) marketplace = 'Amazon';
         else if (url.includes('mercadolivre') || url.includes('mlb')) marketplace = 'Mercado Livre';
         else if (url.includes('shopee')) marketplace = 'Shopee';
         else if (url.includes('aliexpress')) marketplace = 'AliExpress';
         else marketplace = 'Loja Online';
+      }
+
+      // Robust Category Fallback matching
+      if ((!category_id || !subcategory_id) && categories && Array.isArray(categories)) {
+        const fullContent = (title + " " + description + " " + url).toLowerCase();
+
+        // Tech Detect
+        if (fullContent.match(/gamer|pc |notebook|smartphone|eletrônico|celular|playstation|xbox|fone|headset|hardware/)) {
+          const techCat = categories.find((c: any) => c.name.toLowerCase().match(/tech|tecnologia/));
+          if (techCat) {
+            category_id = techCat.id.toString();
+            if (fullContent.match(/mouse|teclado|headset|periférico/)) subcategory_id = techCat.subcategories?.find((s: any) => s.name.toLowerCase().includes('periférico'))?.id?.toString();
+            else if (fullContent.match(/processador|placa|ssd|memória/)) subcategory_id = techCat.subcategories?.find((s: any) => s.name.toLowerCase().includes('hardware'))?.id?.toString();
+            else if (fullContent.match(/ps5|xbox|nintendo|jogo|game/)) subcategory_id = techCat.subcategories?.find((s: any) => s.name.toLowerCase().includes('game'))?.id?.toString();
+          }
+        }
+        // Fashion Detect
+        else if (fullContent.match(/camisa|tênis|calça|vestido|roupa|moda|calçado/)) {
+          const modaCat = categories.find((c: any) => c.name.toLowerCase().match(/moda|fashion/));
+          if (modaCat) {
+            category_id = modaCat.id.toString();
+            if (fullContent.match(/tênis|sapato|sneaker/)) subcategory_id = modaCat.subcategories?.find((s: any) => s.name.toLowerCase().includes('tênis'))?.id?.toString();
+          }
+        }
+
+        // Final desperate attempt at exact matching
+        if (!category_id) {
+          for (const cat of categories) {
+            if (fullContent.includes(cat.name.toLowerCase())) {
+              category_id = cat.id.toString();
+              break;
+            }
+          }
+        }
+      }
+
+      // Final check: if title is just the marketplace name, it's probably a failed scrape
+      if (title.trim() === marketplace && price === 0) {
+        throw new Error("Scrape resulted in marketplace name only and 0 price - likely blocked.");
       }
 
       res.json({

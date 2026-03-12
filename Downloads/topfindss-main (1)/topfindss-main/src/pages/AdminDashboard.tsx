@@ -341,7 +341,11 @@ export default function AdminDashboard({ auth, onLogout, categories, onRefreshCa
     if (isBatchProcessing) {
       const nextIndex = batchQueue.findIndex(i => i.status === 'pending');
       if (nextIndex !== -1) {
-        processBatchItem(nextIndex);
+        // Add a small delay to avoid being blocked
+        const timer = setTimeout(() => {
+          processBatchItem(nextIndex);
+        }, 1200);
+        return () => clearTimeout(timer);
       } else {
         setIsBatchProcessing(false);
         showAlert("Concluído", "A fila de importação foi finalizada.");
